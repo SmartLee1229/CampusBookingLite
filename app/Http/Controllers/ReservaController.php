@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Reserva;
+use App\Models\Espacio;
+
+class ReservaController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $reservas = Reserva::with('espacio')->paginate(10);
+        return view('reservas.index', compact('reservas'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $espacios = Espacio::all();
+        return view('reservas.create', compact('espacios'));
+    }
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'espacio_id' => 'required|exists:espacios,id',
+            'solicitante' => 'required|string|max:255',
+            'fecha' => 'required|date',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fin' => 'required|date_format:H:i',
+        ]);
+
+        Reserva::create($request->all());
+        return redirect()->route('reservas.index')->with('success', 'Reserva creada correctamente');
+    }
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Reserva $reserva)
+    {
+        $espacios = Espacio::all();
+        return view('reservas.edit', compact('reserva','espacios'));
+    }
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Reserva $reserva)
+    {
+        $request->validate([
+            'espacio_id' => 'required|exists:espacios,id',
+            'solicitante' => 'required|string|max:255',
+            'fecha' => 'required|date',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fin' => 'required|date_format:H:i',
+        ]);
+
+        $reserva->update($request->all());
+        return redirect()->route('reservas.index')->with('success', 'Reserva actualizada');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Reserva $reserva)
+    {
+        $reserva->delete();
+        return redirect()->route('reservas.index')->with('success', 'Reserva eliminada');
+    }
+}
